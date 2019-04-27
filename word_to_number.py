@@ -50,8 +50,9 @@ class WordToNumber:
         'billion': 1000000000,
         'trillion': 1000000000000
     }
-    point_group = {
-        'point': '.'
+    group_4 = {
+        'point': '.',
+        'minus': '-'
     }
 
     def remove_punctuation(self):
@@ -65,7 +66,7 @@ class WordToNumber:
     def filter_words(self):
         self.word_number_list = [word for word in self.word_number.split() if
                                  word in list(self.group_1.keys()) + list(self.group_2.keys()) + list(
-                                     self.group_3.keys()) + list(self.point_group.keys())]
+                                     self.group_3.keys()) + list(self.group_4.keys())]
 
     def word_to_num(self, i=0):
 
@@ -73,17 +74,24 @@ class WordToNumber:
         self.remove_punctuation()
         self.to_lower()
         self.filter_words()
+        is_negative = False
 
         res = 0
 
         while i < len(self.word_number_list):
 
+            if i == 0 and self.group_4[self.word_number_list[i]] == '-':
+                is_negative = True
+                i += 1
+                continue
             # In case there's a point
             try:
-                if self.point_group[self.word_number_list[i]] == '.':
+                if self.group_4[self.word_number_list[i]] == '.':
                     val_after_point = self.word_to_num(i + 1)
                     val_after_point = val_after_point / 10**len(str(val_after_point))
                     res = res + val_after_point
+                    if is_negative:
+                        res *= -1
                     return res
             except KeyError:
                 pass
@@ -115,6 +123,8 @@ class WordToNumber:
                 except KeyError:
                     if multiplier > 0:
                         res += multiplier
+        if is_negative:
+            res *= -1
         return res
 
     # Helper function to find a multiplier
