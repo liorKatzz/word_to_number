@@ -1,4 +1,5 @@
 import re
+from nltk.stem import WordNetLemmatizer
 
 
 class WordToNumber:
@@ -64,15 +65,20 @@ class WordToNumber:
         self.word_number = self.word_number.lower()
 
     def filter_words(self):
-        self.word_number_list = [word for word in self.word_number.split() if
+        self.word_number_list = [word for word in self.word_number_list if
                                  word in list(self.group_1.keys()) + list(self.group_2.keys()) + list(
                                      self.group_3.keys()) + list(self.group_4.keys())]
+
+    def lemmatize(self):
+        lemmatizer = WordNetLemmatizer()
+        self.word_number_list = [lemmatizer.lemmatize(word) for word in self.word_number.split()]
 
     def word_to_num(self, i=0):
 
         # Taking it through the pipe:
         self.remove_punctuation()
         self.to_lower()
+        self.lemmatize()
         self.filter_words()
         is_negative = False
 
@@ -80,13 +86,12 @@ class WordToNumber:
 
         while i < len(self.word_number_list):
 
-            if i == 0 and self.group_4[self.word_number_list[i]] == '-':
-                is_negative = True
-                i += 1
-                continue
-            # In case there's a point
             try:
-                if self.group_4[self.word_number_list[i]] == '.':
+                if i == 0 and self.group_4[self.word_number_list[i]] == '-':
+                    is_negative = True
+                    i += 1
+                    continue
+                elif self.group_4[self.word_number_list[i]] == '.':
                     val_after_point = self.word_to_num(i + 1)
                     val_after_point = val_after_point / 10**len(str(val_after_point))
                     res = res + val_after_point
@@ -145,4 +150,6 @@ class WordToNumber:
             return res, i
         else:
             return 1, i
+
+
 
